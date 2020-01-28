@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>Framework to ease creation of Amazon StepFunction workers using dotnet</Description>
+        <Copyright>Vincent DARON &amp; dFakto</Copyright>
+        <PackageProjectUrl>https://github.com/depfac/dfakto.states.workers</PackageProjectUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/depfac/dfakto.states.workers/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/depfac/dfakto.states.workers</RepositoryUrl>
+        <LangVersion>latest</LangVersion>
+        <PackageVersion>1.0.4</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.StepFunctions" Version="3.3.103.15" />
+        <PackageReference Include="FluentFTP" Version="29.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.1" />
+        <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    </ItemGroup>
+
+</Project>

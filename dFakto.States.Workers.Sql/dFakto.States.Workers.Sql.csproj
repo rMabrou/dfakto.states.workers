@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Description>SQLWorker to query database or to do massive imports usinh the dFakto.States.Workers framework</Description>
+        <Copyright>Vincent DARON &amp; dFakto</Copyright>
+        <PackageProjectUrl>https://github.com/depfac/dfakto.states.workers</PackageProjectUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/depfac/dfakto.states.workers/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/depfac/dfakto.states.workers</RepositoryUrl>
+        <LangVersion>latest</LangVersion>
+        <PackageVersion>1.0.4</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MySqlConnector" Version="0.61.0" />
+        <PackageReference Include="Npgsql" Version="4.1.2" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="Workers\Sql\SQLServer\BulkInsertWorkerInput.cs" />
+      <Compile Remove="Workers\Sql\SQLServer\BulkInsertWorker.cs" />
+      <Compile Remove="Workers\Sql\PostgreSQL\CopyWorker.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\dFakto.States.Workers\dFakto.States.Workers.csproj" />
+    </ItemGroup>
+
+</Project>
