@@ -22,7 +22,7 @@ namespace dFakto.States.Workers.Tests
     }
     public static class WorkerExtensions
     {
-        private static JsonSerializerOptions _options = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
         {
             Converters = { new JsonStringEnumConverter()},
             WriteIndented = false,
@@ -33,8 +33,8 @@ namespace dFakto.States.Workers.Tests
         public static async Task<U> DoJsonWork<T, U>(this IWorker worker, T input)
         {
             return JsonSerializer.Deserialize<U>(
-                await worker.DoRawJsonWorkAsync(JsonSerializer.Serialize(input, _options), CancellationToken.None),
-                _options);
+                await worker.DoRawJsonWorkAsync(JsonSerializer.Serialize(input, Options), CancellationToken.None),
+                Options);
         }
     }
 }

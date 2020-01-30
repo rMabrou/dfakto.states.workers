@@ -73,6 +73,12 @@ namespace dFakto.States.Workers.Tests
                                 Type = SqlDatabaseType.SqlServer,
                                 ConnectionString = "server=localhost; user id=sa; password=depfac$2000; database=test"
                             },
+                            new DatabaseConfig
+                            {
+                                Name = "mariadb",
+                                Type = SqlDatabaseType.MariaDb,
+                                ConnectionString = "server=localhost; user id=root; password=depfac$2000; database=test; AllowLoadLocalInfile=true"
+                            },
                         };
                         
                         x.AddDirectoryFileStore();

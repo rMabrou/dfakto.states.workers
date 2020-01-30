@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,8 +19,15 @@ namespace dFakto.States.Workers.Tests
         [Theory]
         [InlineData("pgsql","sqlserver")]
         [InlineData("sqlserver","sqlserver")]
+        [InlineData("mariadb","sqlserver")]
+        
         [InlineData("sqlserver","pgsql")]
         [InlineData("pgsql","pgsql")]
+        [InlineData("mariadb", "pgsql")]
+        
+        [InlineData("sqlserver","mariadb")]
+        [InlineData("pgsql","mariadb")]
+        [InlineData("mariadb", "mariadb")]
         public async Task TestBulkInsertFromQuery(string source, string destination)
         {
             var sql = Host.Services.GetService<SqlBulkInsertWorker>();
@@ -29,7 +37,7 @@ namespace dFakto.States.Workers.Tests
             string tableSrc = CreateTable(src);
             string tableDst = CreateTable(dst);
 
-            Insert(src,tableSrc, (1, "hello"), (2, "world"),(3, "world"),(4, "world"),(5, "world"));
+            Insert(src, tableSrc, Enumerable.Range(0, 1000).Select(x => (x, "hello")));
 
             try
             {
@@ -45,7 +53,7 @@ namespace dFakto.States.Workers.Tests
                 
                 var result = await sql.DoJsonWork<BulkInsertInput,bool>(input);
                 Assert.True(result);
-                Assert.Equal(5,Count(dst,tableDst));
+                Assert.Equal(1000,Count(dst,tableDst));
             }
             finally
             {
@@ -57,6 +65,7 @@ namespace dFakto.States.Workers.Tests
         [Theory]
         [InlineData("pgsql")]
         [InlineData("sqlserver")]
+        [InlineData("mariadb")]
         public async Task TestBulkInsertFromCsvFileWithoutHeader(string destination)
         {
             var fileStore = Host.Services.GetService<FileStoreFactory>().GetFileStoreFromName("test");
@@ -98,6 +107,7 @@ namespace dFakto.States.Workers.Tests
         [Theory]
         [InlineData("pgsql")]
         [InlineData("sqlserver")]
+        [InlineData("mariadb")]
         public async Task TestBulkInsertFromCsvFileWithHeader(string destination)
         {
             var fileStore = Host.Services.GetService<FileStoreFactory>().GetFileStoreFromName("test");
@@ -161,12 +171,13 @@ namespace dFakto.States.Workers.Tests
             }
         }
 
-        private void Insert(BaseDatabase database, string tableName, params (int, string)[] values)
+        private void Insert(BaseDatabase database, string tableName, IEnumerable<(int, string )> values)
         {
+            var conn = database.CreateConnection();
+            conn.Open();
+            
             foreach (var value in values)
             {
-                var conn = database.CreateConnection();
-                conn.Open();
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = $"INSERT INTO {tableName} VALUES(@p1, @p2)";
@@ -187,12 +198,14 @@ namespace dFakto.States.Workers.Tests
 
         private int Count(BaseDatabase database, string tableName)
         {
-            var conn = database.CreateConnection();
-            conn.Open();
-            using (var cmd = conn.CreateCommand())
+            using (var conn = database.CreateConnection())
             {
-                cmd.CommandText = $"SELECT COUNT(*) FROM {tableName}";
-                return Convert.ToInt32(cmd.ExecuteScalar());
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $"SELECT COUNT(*) FROM {tableName}";
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
             }
         }
     }

@@ -15,12 +15,19 @@ namespace dFakto.States.Workers.Sql.MySQL
 
         public override DbConnection CreateConnection()
         {
+            //MySQL Server, the connection string must have AllowLoadLocalInfile=true
             return new MySqlConnection(Config.ConnectionString);
         }
 
-        public override Task BulkInsert(IDataReader reader, string schemaName, string tableName, int timeout, CancellationToken token)
+        public override async Task BulkInsert(IDataReader reader, string schemaName, string tableName, int timeout, CancellationToken token)
         {
-            throw new System.NotImplementedException();
+            using (var conn = new MySqlConnection(Config.ConnectionString))
+            {
+                var bulkCopy = new MySqlBulkCopy(conn);
+                bulkCopy.BulkCopyTimeout = timeout;
+                bulkCopy.DestinationTableName = tableName;
+                bulkCopy.WriteToServer(reader);
+            }
         }
     }
 }
