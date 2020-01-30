@@ -33,10 +33,10 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateGZipFileInStore(fileStore, fileName);
 
-            var result = await worker.DoWorkAsync(new GZipInput
+            var result = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
-            }, new CancellationToken());
+            });
 
             Assert.Equal(Content, await ReadTextFileInStore(result));
             Assert.True(await fileStore.Exists(token));
@@ -51,11 +51,11 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateFileInStore(fileStore, fileName);
 
-            var compressedFileToken = await worker.DoWorkAsync(new GZipInput
+            var compressedFileToken = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
                 Compress = true
-            }, new CancellationToken());
+            });
 
             var outputFileToken = await UnzipFile("test", compressedFileToken);
             Assert.Equal(Content, await ReadTextFileInStore(outputFileToken));
@@ -69,11 +69,11 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateGZipFileInStore(fileStore, "helloworld.txt.gz");
 
-            var result = await worker.DoWorkAsync(new GZipInput
+            var result = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
                 DeleteSource = true
-            }, new CancellationToken());
+            });
 
             Assert.Equal(Content, await ReadTextFileInStore(result));
             Assert.False(await fileStore.Exists(token));
@@ -87,12 +87,12 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateFileInStore(fileStore, "helloworld.txt");
 
-            var compressedFileToken = await worker.DoWorkAsync(new GZipInput
+            var compressedFileToken = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
                 Compress = true,
                 DeleteSource = true
-            }, new CancellationToken());
+            });
 
             var outputFileToken = await UnzipFile("test", compressedFileToken);
             Assert.Equal(Content, await ReadTextFileInStore(outputFileToken));
@@ -106,11 +106,11 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateGZipFileInStore(fileStore, "helloworld.txt.gz");
 
-            var result = await worker.DoWorkAsync(new GZipInput
+            var result = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
                 OutputFileName = "hello.txt"
-            }, new CancellationToken());
+            });
 
             Assert.Equal(Content, await ReadTextFileInStore(result));
             Assert.True(await fileStore.Exists(token));
@@ -124,12 +124,12 @@ namespace dFakto.States.Workers.Tests
             GZipWorker worker = Host.Services.GetService<GZipWorker>();
             var token = await CreateFileInStore(fileStore, "helloworld.txt");
 
-            var compressedFileToken = await worker.DoWorkAsync(new GZipInput
+            var compressedFileToken = await worker.DoJsonWork<GZipInput,string>(new GZipInput
             {
                 FileToken = token,
                 Compress = true,
                 OutputFileName = "hello.txt"
-            }, new CancellationToken());
+            });
             
             Assert.Equal("hello.txt", await fileStore.GetFileName(compressedFileToken));
         }

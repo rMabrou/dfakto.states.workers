@@ -8,7 +8,6 @@ using dFakto.States.Workers.FileStores;
 using dFakto.States.Workers.Interfaces;
 using dFakto.States.Workers.Sql;
 using dFakto.States.Workers.Sql.Common;
-using dFakto.StepFunctions.Workers.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -44,7 +43,7 @@ namespace dFakto.States.Workers.Tests
                 input.Destination.ConnectionName = dst.Name;
                 input.Destination.TableName = tableDst;
                 
-                var result = await sql.DoWorkAsync(input, CancellationToken.None);
+                var result = await sql.DoJsonWork<BulkInsertInput,bool>(input);
                 Assert.True(result);
                 Assert.Equal(5,Count(dst,tableDst));
             }
@@ -85,7 +84,7 @@ namespace dFakto.States.Workers.Tests
 
                 var sql = Host.Services.GetService<SqlBulkInsertWorker>();
 
-                var result = await sql.DoWorkAsync(input, CancellationToken.None);
+                var result = await sql.DoJsonWork<BulkInsertInput,bool>(input);
 
                 Assert.True(result);
                 Assert.Equal(4, Count(dst, tableName));
@@ -127,7 +126,7 @@ namespace dFakto.States.Workers.Tests
 
                 var sql = Host.Services.GetService<SqlBulkInsertWorker>();
 
-                var result = await sql.DoWorkAsync(input, CancellationToken.None);
+                var result = await sql.DoJsonWork<BulkInsertInput,bool>(input);
 
                 Assert.True(result);
                 Assert.Equal(4, Count(dst, tableName));

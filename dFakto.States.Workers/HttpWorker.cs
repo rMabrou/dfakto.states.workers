@@ -17,7 +17,7 @@ namespace dFakto.States.Workers
     {
         public Uri Uri { get; set; }
         public string Method { get; set; } = HttpMethod.Get.Method;
-        public JsonElement JsonContent { get; set; }
+        public JsonElement? JsonContent { get; set; }
         public string ContentFileToken { get; set; }
         public string OutputContentFileName { get; set; }
         public string OutputFileStoreName { get; set; }
@@ -27,7 +27,7 @@ namespace dFakto.States.Workers
 
     public class HttpWorkerOutput
     {
-        public JsonElement JsonContent { get; set; }
+        public JsonElement? JsonContent { get; set; }
         public string ContentFileToken { get; set; }
         public long Length { get; set; }
         public HttpStatusCode StatusCode { get; set; }
@@ -83,7 +83,10 @@ namespace dFakto.States.Workers
                         if (response.Content.Headers.ContentType.MediaType == JsonMediaType && string.IsNullOrEmpty(workerInput.OutputFileStoreName))
                         {
                             var json = await response.Content.ReadAsStringAsync();
-                            result.JsonContent = JsonDocument.Parse(json).RootElement;
+                            using (var doc = JsonDocument.Parse(json))
+                            {
+                                result.JsonContent = doc.RootElement.Clone();
+                            }
                             result.Length = json.Length;
                         }
                         else
@@ -125,11 +128,11 @@ namespace dFakto.States.Workers
         private async Task<HttpContent> GetRequestContent(HttpWorkerInput workerInput)
         {
             HttpContent requestContent = null;
-            if (workerInput.JsonContent.ValueKind != JsonValueKind.Null &&
-                workerInput.JsonContent.ValueKind != JsonValueKind.Undefined)
+            if (workerInput.JsonContent.HasValue && workerInput.JsonContent.Value.ValueKind != JsonValueKind.Null &&
+                workerInput.JsonContent.Value.ValueKind != JsonValueKind.Undefined)
             {
                 _logger.LogDebug("Using RequestBody Json as Request Content");
-                requestContent = new StringContent(workerInput.JsonContent.GetRawText(), Encoding.UTF8, JsonMediaType);
+                requestContent = new StringContent(workerInput.JsonContent.Value.GetRawText(), Encoding.UTF8, JsonMediaType);
             }
             else if (workerInput.ContentFileToken != null)
             {

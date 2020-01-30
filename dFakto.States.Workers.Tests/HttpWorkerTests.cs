@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -55,13 +56,13 @@ namespace dFakto.States.Workers.Tests
         public async Task TestGetJson()
         {
             HttpWorker worker = Host.Services.GetService<HttpWorker>();
-            var response = await worker.DoWorkAsync(new HttpWorkerInput
+            var response = await worker.DoJsonWork<HttpWorkerInput,HttpWorkerOutput>(new HttpWorkerInput
             {
                 Method = "GET",
                 Uri = new Uri("https://postman-echo.com/get?foor=bar"),
                 OutputContentFileName = "test.json",
                 OutputFileStoreName = "test"
-            }, CancellationToken.None);
+            });
 
             Assert.Equal(HttpStatusCode.OK,response.StatusCode);
             Assert.True(response.Length > 0);
@@ -80,14 +81,14 @@ namespace dFakto.States.Workers.Tests
 
             var token = SetFileTokenContent(json);
             
-            HttpWorker worker = Host.Services.GetService<HttpWorker>();
-            var response = await worker.DoWorkAsync(new HttpWorkerInput
+            IWorker worker = Host.Services.GetService<HttpWorker>();
+            var response = await worker.DoJsonWork<HttpWorkerInput,HttpWorkerOutput>(new HttpWorkerInput
             {
                 Method = "POST",
                 Uri = new Uri("https://postman-echo.com/post"),
                 ContentFileToken = token,
                 OutputFileStoreName = "test"
-            }, CancellationToken.None);
+            });
 
             Assert.Equal(HttpStatusCode.OK,response.StatusCode);
             Assert.True(response.Length > 0);
@@ -111,14 +112,14 @@ namespace dFakto.States.Workers.Tests
                 writer.Write(text);
             }
             HttpWorker worker = Host.Services.GetService<HttpWorker>();
-            var response = await worker.DoWorkAsync(new HttpWorkerInput
+            var response = await worker.DoJsonWork<HttpWorkerInput,HttpWorkerOutput>(new HttpWorkerInput
             {
                 Method = "POST",
                 Uri = new Uri("https://postman-echo.com/post"),
                 ContentFileToken = token,
                 OutputFileStoreName = "test",
                 OutputContentFileName = "test.json"
-            }, CancellationToken.None);
+            });
 
             Assert.Equal(HttpStatusCode.OK,response.StatusCode);
             Assert.True(response.Length > 0);
@@ -129,12 +130,12 @@ namespace dFakto.States.Workers.Tests
         public async Task TestErrorManagement()
         {
             HttpWorker worker = Host.Services.GetService<HttpWorker>();
-            var response = await worker.DoWorkAsync(new HttpWorkerInput
+            var response = await worker.DoJsonWork<HttpWorkerInput,HttpWorkerOutput>(new HttpWorkerInput
             {
                 Method = "GET",
                 Uri = new Uri("https://postman-echo.com/status/404"),
                 FailIfError = false
-            }, CancellationToken.None);
+            });
 
             Assert.Equal(HttpStatusCode.NotFound,response.StatusCode);
             Assert.Null(response.ContentFileToken);

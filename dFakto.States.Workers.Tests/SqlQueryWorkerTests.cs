@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using dFakto.States.Workers.Sql;
 using dFakto.States.Workers.Sql.Common;
-using dFakto.StepFunctions.Workers.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -32,9 +31,9 @@ namespace dFakto.States.Workers.Tests
                 input.ConnectionName = database.Name;
                 input.Query = "SELECT COUNT(*) FROM " + _tableName;
                 input.Type = SqlQueryType.Scalar;
-                var output = await sql.DoWorkAsync(input, CancellationToken.None);
+                var output = await sql.DoJsonWork<SqlQueryInput,SqlQueryOutput>(input);
                 
-                Assert.Equal(2L,Convert.ToInt64(output.Scalar));
+                Assert.Equal(2L,((JsonElement)output.Scalar).GetDecimal());
             }
         }
         
@@ -51,7 +50,7 @@ namespace dFakto.States.Workers.Tests
                 input.ConnectionName = database.Name;
                 input.Query = "TRUNCATE TABLE " + _tableName;
                 input.Type = SqlQueryType.NonQuery;
-                var output = await sql.DoWorkAsync(input, CancellationToken.None);
+                var output = await sql.DoJsonWork<SqlQueryInput,SqlQueryOutput>(input);
                 
                 Assert.Equal(0L,Count(database));
             }
@@ -70,13 +69,13 @@ namespace dFakto.States.Workers.Tests
                 input.ConnectionName = database.Name;
                 input.Query = $"SELECT * FROM {_tableName} ORDER BY COL1";
                 input.Type = SqlQueryType.Reader;
-                var output = await sql.DoWorkAsync(input, CancellationToken.None);
+                var output = await sql.DoJsonWork<SqlQueryInput,SqlQueryOutput>(input);
                 
                 Assert.Equal(2,output.Result.Count);
-                Assert.Equal(1,output.Result[0]["col1"]);
-                Assert.Equal("hello",output.Result[0]["col2"]);
-                Assert.Equal(2,output.Result[1]["col1"]);
-                Assert.Equal("world",output.Result[1]["col2"]);
+                Assert.Equal(1,((JsonElement)output.Result[0]["col1"]).GetInt32());
+                Assert.Equal("hello",((JsonElement)output.Result[0]["col2"]).GetString());
+                Assert.Equal(2,((JsonElement)output.Result[1]["col1"]).GetInt32());
+                Assert.Equal("world",((JsonElement)output.Result[1]["col2"]).GetString());
             }
         }
         
@@ -102,11 +101,11 @@ namespace dFakto.States.Workers.Tests
                 
                 input.Params = new [] {para};
                 
-                var output = await sql.DoWorkAsync(input, CancellationToken.None);
+                var output = await sql.DoJsonWork<SqlQueryInput,SqlQueryOutput>(input);
                 
                 Assert.Single(output.Result);
-                Assert.Equal("world", output.Result[0]["col2"]);
-                Assert.Equal(2, output.Result[0]["col1"]);
+                Assert.Equal("world", ((JsonElement)output.Result[0]["col2"]).GetString());
+                Assert.Equal(2, ((JsonElement)output.Result[0]["col1"]).GetInt32());
             }
         }
 
