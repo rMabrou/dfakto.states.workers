@@ -21,12 +21,15 @@ namespace dFakto.States.Workers.Sql.Common
         public async Task TruncateTable(string schemaName, string tableName)
         {
             string fullTableName = string.IsNullOrEmpty(schemaName) ? tableName : $"{schemaName}.{tableName}";
-            
+
             using (var conn = CreateConnection())
-            using(var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = "TRUNCATE TABLE " + fullTableName;
-                await cmd.ExecuteNonQueryAsync();
+                await conn.OpenAsync();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "TRUNCATE TABLE " + fullTableName;
+                    await cmd.ExecuteNonQueryAsync();
+                }
             }
         }
 
